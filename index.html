@@ -1,0 +1,80 @@
+---
+title: Web Calculators
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ site.title }}</title>
+  <meta name="description" content="{{ site.description }}">
+  <style>
+    :root {
+      --bg: #f6f7f9; --card: #ffffff; --text: #1c2430; --muted: #5d6877;
+      --accent: #1f6feb; --border: #dde2e8;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f141b; --card: #171e28; --text: #e6ebf2; --muted: #9aa6b6;
+        --accent: #58a6ff; --border: #2a3441;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0 16px 48px; background: var(--bg); color: var(--text);
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    main { max-width: 760px; margin: 0 auto; }
+    header { padding: 48px 0 24px; }
+    h1 { margin: 0 0 8px; font-size: 2rem; }
+    header p { margin: 0; color: var(--muted); }
+    ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+    a.card {
+      display: block; padding: 16px 20px; background: var(--card); color: inherit;
+      border: 1px solid var(--border); border-radius: 10px; text-decoration: none;
+    }
+    a.card:hover, a.card:focus-visible { border-color: var(--accent); outline: none; }
+    .name { font-size: 1.1rem; font-weight: 600; color: var(--accent); text-transform: capitalize; }
+    .name.custom { text-transform: none; }
+    .desc { margin-top: 4px; color: var(--muted); }
+    footer { margin-top: 32px; color: var(--muted); font-size: 0.9rem; }
+    footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>{{ site.title }}</h1>
+    <p>{{ site.description }}</p>
+  </header>
+
+  <ul>
+  {%- comment -%}
+    Lists every .html file in the repository (except this page and 404.html), sorted by file name.
+    Titles and descriptions come from _data/pages.yml when present, and otherwise from the file name.
+  {%- endcomment -%}
+  {%- assign pages = site.static_files | where: "extname", ".html" | sort: "basename" -%}
+  {%- for file in pages -%}
+    {%- if file.name == "index.html" or file.name == "404.html" -%}{%- continue -%}{%- endif -%}
+    {%- assign info = site.data.pages[file.basename] -%}
+    <li>
+      <a class="card" href="{{ file.path | relative_url }}">
+        {%- if info.title %}
+        <div class="name custom">{{ info.title }}</div>
+        {%- else %}
+        <div class="name">{{ file.basename | replace: "_", " " | replace: "-", " " }}</div>
+        {%- endif %}
+        {%- if info.description %}
+        <div class="desc">{{ info.description }}</div>
+        {%- endif %}
+      </a>
+    </li>
+  {%- endfor -%}
+  </ul>
+
+  <footer>
+    <a href="https://github.com/jwkunz/web_calculators">View the source on GitHub</a>
+  </footer>
+</main>
+</body>
+</html>

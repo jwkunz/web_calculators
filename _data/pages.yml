@@ -1,0 +1,19 @@
+# Optional details for the landing page.
+#
+# Every .html file in the repository is listed on the landing page automatically,
+# so you do not need to edit this file to add a page. Add an entry here only if you
+# want a nicer title or a short description than the one made from the file name.
+#
+# The key is the file name WITHOUT ".html". Example:
+#
+#   my_new_calculator:
+#     title: My New Calculator
+#     description: One sentence on what it does.
+
+plot_and_integrate:
+  title: Plot and Integration Calculator
+  description: Plot a function of x that you type in, and integrate it over a range.
+
+discrete_time_fourier_transform_viewer:
+  title: Discrete Time Fourier Transform Viewer
+  description: Sample a function of time and view its discrete-time Fourier transform.

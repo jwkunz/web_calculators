@@ -1,0 +1,7 @@
+title: Web Calculators
+description: Small calculators and viewers that run entirely in your browser.
+
+# Files that should not be published or listed on the landing page.
+exclude:
+  - README.md
+  - LICENSE
