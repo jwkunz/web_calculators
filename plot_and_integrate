@@ -1,0 +1,314 @@
+<!--DOCTYPE html-->
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title>Plot and Integration Calculator</title>
+	<script src="https://unpkg.com/mathjs@9.5.1/lib/browser/math.js"></script>
+
+	<script src="https://cdn.plot.ly/plotly-1.35.2.min.js"></script>
+
+	<style>
+		input {
+			padding: 6px;
+			font-family: sans-serif;
+			font-size: 16pt;
+			width: 75px;
+			background-color: #eab676;
+		}
+
+		input.math {
+			width: 600px;
+		}
+
+		label {
+			padding: 6px;
+			font-family: sans-serif;
+			font-size: 16pt;
+			width: 100px;
+		}
+
+		body {
+			background-color: #1e81b0;
+		}
+
+		html,
+
+		form {
+			margin: 20px;
+		}
+
+		button {
+			font-family: sans-serif;
+			font-size: 16pt;
+			width: 150;
+			background-color: #e28743;
+
+		}
+
+		#div_plot {
+			background-color: darkgreen;
+		}
+
+		#title {
+			font-family: sans-serif;
+			font-size: 32pt;
+			color: #eeeee4;
+		}
+	</style>
+
+
+
+</head>
+
+<body>
+	<p id="title"> Plot and Integration Calculator </p>
+
+	<form id="form_eq">
+		<label for="eq">Enter f(x)=</label>
+		<input class="math" id="eq" value="exp(-0.5*x^2)/sqrt(2*PI)">
+	</form>
+
+	<form id="form_start">
+		<label for="start">Start Value:</label>
+		<input id="start" value="-3.0" />
+	</form>
+
+	<form id="form_stop">
+		<label for="stop">Stop Value:</label>
+		<input id="stop" value="3.0" />
+	</form>
+
+
+	<form id="form_numPoints">
+		<label for="numPoints">Number of Points:</label>
+		<input id="numPoints" value="19" />
+	</form>
+
+	<button type='button' id="button_draw" onclick=draw()>
+		Draw
+	</button>
+
+	<button type='button' id="button_integrate" onclick=integrate()>
+		Integrate
+	</button>
+
+
+	<div id="div_plot"></div>
+
+	<script>
+		function draw() {
+			try {
+				// compile the expression once
+				const expression = document.getElementById('eq').value
+				const expr = math.compile(expression)
+				const numPoints = parseInt(document.getElementById('numPoints').value)
+				const start = math.compile(document.getElementById('start').value).evaluate()
+				const stop = math.compile(document.getElementById('stop').value).evaluate()
+				const dt = (stop - start) / (numPoints - 1)
+
+				// evaluate the expression repeatedly for different values of x
+				const xValues = math.range(start, stop + dt, dt).toArray()
+				const yValues = xValues.map(function (x) {
+					return expr.evaluate({ x: x })
+				})
+
+				// render the plot using plotly
+				const trace1 = {
+					x: xValues,
+					y: yValues,
+					modes: 'lines+markers',
+					marker: {
+						color: 'red',
+						size: 8
+					},
+					line: {
+						color: 'black',
+						width: 1
+					}
+				}
+
+				const data = [trace1]
+
+				let layout = {
+					plot_bgcolor: '#abdbe3',
+					paper_bgcolor: '#abdbe3',
+					xaxis: {
+						title: 'x',
+						showgrid: true,
+						zeroline: true
+					},
+					yaxis: {
+						title: 'f(x)',
+						showgrid: true,
+						zeroline: true
+					}
+				};
+
+				Plotly.newPlot('div_plot', data, layout)
+			}
+			catch (err) {
+				console.error(err)
+				alert(err)
+			}
+		}
+
+		// Midpoint integration
+
+		function integrate_mid(
+			expr,
+			a, // Lower bound
+			b, // Upper bound
+			numPoints // Number of points
+		) {
+			// Midoint integration
+			const dt = (b - a) / (numPoints - 1)
+			// evaluate the expression repeatedly for different values of x
+			const xValues = math.range(a, b + dt, dt).toArray()
+			const yValues = xValues.map(function (x) {
+				return math.re(expr.evaluate({ x: x }))
+			})
+			return math.sum(yValues) * dt
+		}
+
+		G7_weights = [
+			1.294849661688696932706114326790820e-01,
+			2.797053914892766679014677714237796e-01,
+			3.818300505051189449503697754889751e-01,
+			4.179591836734693877551020408163265e-01,
+			3.818300505051189449503697754889751e-01,
+			2.797053914892766679014677714237796e-01,
+			1.294849661688696932706114326790820e-01
+		]
+
+		K15_nodes = [
+			-9.914553711208126392068546975263285e-01,
+			-9.491079123427585245261896840478513e-01,
+			-8.648644233597690727897127886409262e-01,
+			-7.415311855993944398638647732807884e-01,
+			-5.860872354676911302941448382587296e-01,
+			-4.058451513773971669066064120769615e-01,
+			-2.077849550078984676006894037732449e-01,
+			0.0,
+			2.077849550078984676006894037732449e-01,
+			4.058451513773971669066064120769615e-01,
+			5.860872354676911302941448382587296e-01,
+			7.415311855993944398638647732807884e-01,
+			8.648644233597690727897127886409262e-01,
+			9.491079123427585245261896840478513e-01,
+			9.914553711208126392068546975263285e-01
+		]
+		K15_weights = [
+			2.293532201052922496373200805896959e-02,
+			6.309209262997855329070066318920429e-02,
+			1.047900103222501838398763225415180e-01,
+			1.406532597155259187451895905102379e-01,
+			1.690047266392679028265834265985503e-01,
+			1.903505780647854099132564024210137e-01,
+			2.044329400752988924141619992346491e-01,
+			2.094821410847278280129991748917143e-01,
+			2.044329400752988924141619992346491e-01,
+			1.903505780647854099132564024210137e-01,
+			1.690047266392679028265834265985503e-01,
+			1.406532597155259187451895905102379e-01,
+			1.047900103222501838398763225415180e-01,
+			6.309209262997855329070066318920429e-02,
+			2.293532201052922496373200805896959e-02
+		]
+
+		function integrate_G7K15(
+			expr,
+			a, // Lower bound
+			b, // Upper bound
+			er = 1E-15, // Error tolerance (15 digits for double precision)
+			max_depth = 50, // Maximum recursion (refinement) depth
+			quiet = false // If true, will not print warning and status about hitting max_depth
+		) {
+			// Scale the nodes
+			var jacobian = (b - a) / 2.0
+			var middle = (a + b) / 2.0
+			var x_K15 = math.add(math.multiply(K15_nodes, jacobian), middle)
+
+			// Sample the function
+			var K15_samples = x_K15.map(function (x) {
+				return math.re(expr.evaluate({ x: x }))
+			})
+
+			// Integrate Gauss and Kronrod
+			var result_G = 0.0
+			var result_K = 0.0
+			for (let ii = 0; ii < x_K15.length; ii++) {
+				// Kronrod 
+				result_K += K15_samples[ii] * K15_weights[ii]
+				if ((ii % 2) == 1) {
+					// Gauss on odd samples
+					result_G += K15_samples[ii] * G7_weights[math.floor(ii / 2)]
+				}
+			}
+			// Scale result
+			result_G *= jacobian
+			result_K *= jacobian
+
+			// Compute residual error
+			var error = math.abs(result_K - result_G)
+
+			// Return result if below error bound
+			if (error < er) {
+				return result_K
+			}
+
+			// Has the recursion acheived maximum depth?
+			if (max_depth == 0) {
+				// Report the error to the user (if allowed)
+				if (!quiet) {
+					window.alert("WARNING: Did not converge in max_depth." + "\n" +
+						"Node start: " + a.toString() + "\n" +
+						"Node end: " + b.toString() + "\n" +
+						"Error: " + error.toString() + "\n")
+				}
+				// Return the best answer
+				return result_K
+			}
+
+			// Has not converged.  Subdivide the integration region in half and recurse
+			return (integrate_G7K15(expr, a, middle, er, max_depth - 1, quiet) + integrate_G7K15(expr, middle, b, er, max_depth - 1, quiet))
+		}
+
+		function integrate() {
+
+			try {
+				// Get user input
+				const expression = document.getElementById('eq').value
+				const expr = math.compile(expression)
+				const numPoints = parseInt(document.getElementById('numPoints').value)
+				const start = math.compile(document.getElementById('start').value).evaluate()
+				const stop = math.compile(document.getElementById('stop').value).evaluate()
+
+				// Integrate
+				var mid_sum = integrate_mid(expr, start, stop, numPoints)
+				var K15_sum = integrate_G7K15(expr, start, stop)
+
+				// Get error
+				var mid_error = math.abs(mid_sum - K15_sum)
+
+				// Print
+				window.alert("Adaptive Gauss-Kronrod 15 integration result: " + K15_sum.toString() + "\n\nThe " + numPoints.toString() + " point midpoint rule yields: " + mid_sum.toString() + "\n\nThe midpoint rule error is: " + mid_error.toString())
+			}
+			catch (err) {
+				console.error(err)
+				alert(err)
+			}
+		}
+
+
+		document.getElementById('form_eq').onsubmit = function (event) {
+			event.preventDefault()
+			draw()
+		}
+
+		draw()
+	</script>
+
+</body>
+
+</html>
